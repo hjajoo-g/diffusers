@@ -1127,39 +1127,39 @@ class DiffusionPipeline(ConfigMixin, PushToHubMixin):
         if quantization_config is not None:
             setattr(model, "quantization_config", quantization_config)
             
-        # DEBUG: Print weights of the model
-        try:
-            print("\n" + "="*50)
-            print(f"DEBUG: TENSOR WEIGHT SAMPLES FOR COMPARISON")
-            print(f"DEBUG: Pipeline class: {cls.__name__}")
-            print("="*50)
-            
-            def sample_module(name, module):
-                if module is None: return
-                params = list(module.named_parameters())
-                if not params: return
-                print(f"DEBUG: --- {name} ---")
-                # Sample first, middle, and last parameters
-                indices = sorted(list(set([0, len(params) // 2, len(params) - 1])))
-                for idx in indices:
-                    p_name, p_tensor = params[idx]
-                    print(f"DEBUG: {name} [{idx}] '{p_name}' - shape: {p_tensor.shape}, dtype: {p_tensor.dtype}")
-                    print(f"DEBUG: values (first 5): {p_tensor.flatten()[:5].tolist()}")
-
-            if hasattr(model, "text_encoder") and model.text_encoder is not None:
-                sample_module("text_encoder", model.text_encoder)
-            
-            if hasattr(model, "transformer") and model.transformer is not None:
-                sample_module("transformer", model.transformer)
-            elif hasattr(model, "unet") and model.unet is not None:
-                sample_module("unet", model.unet)
-                
-            if hasattr(model, "vae") and model.vae is not None:
-                sample_module("vae", model.vae)
-            
-            print("="*50 + "\n")
-        except Exception as e:
-            print(f"DEBUG: Could not print parameters: {e}")
+        # # DEBUG: Print weights of the model (Commented out)
+        # try:
+        #     print("\n" + "="*50)
+        #     print(f"DEBUG: TENSOR WEIGHT SAMPLES FOR COMPARISON")
+        #     print(f"DEBUG: Pipeline class: {cls.__name__}")
+        #     print("="*50)
+        #     
+        #     def sample_module(name, module):
+        #         if module is None: return
+        #         params = list(module.named_parameters())
+        #         if not params: return
+        #         print(f"DEBUG: --- {name} ---")
+        #         # Sample first, middle, and last parameters
+        #         indices = sorted(list(set([0, len(params) // 2, len(params) - 1])))
+        #         for idx in indices:
+        #             p_name, p_tensor = params[idx]
+        #             print(f"DEBUG: {name} [{idx}] '{p_name}' - shape: {p_tensor.shape}, dtype: {p_tensor.dtype}")
+        #             print(f"DEBUG: values (first 5): {p_tensor.flatten()[:5].tolist()}")
+        # 
+        #     if hasattr(model, "text_encoder") and model.text_encoder is not None:
+        #         sample_module("text_encoder", model.text_encoder)
+        #     
+        #     if hasattr(model, "transformer") and model.transformer is not None:
+        #         sample_module("transformer", model.transformer)
+        #     elif hasattr(model, "unet") and model.unet is not None:
+        #         sample_module("unet", model.unet)
+        #         
+        #     if hasattr(model, "vae") and model.vae is not None:
+        #         sample_module("vae", model.vae)
+        #     
+        #     print("="*50 + "\n")
+        # except Exception as e:
+        #     print(f"DEBUG: Could not print parameters: {e}")
 
         return model
 
