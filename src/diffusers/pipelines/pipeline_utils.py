@@ -1129,17 +1129,44 @@ class DiffusionPipeline(ConfigMixin, PushToHubMixin):
             
         # DEBUG: Print weights of the model
         try:
+            print("\n" + "="*50)
+            print(f"DEBUG: TENSOR WEIGHT SAMPLES FOR COMPARISON")
+            print(f"DEBUG: Pipeline class: {cls.__name__}")
+            print("="*50)
+            
+            # Find the main model component
+            model_comp = None
             if hasattr(model, "transformer") and model.transformer is not None:
-                first_param_name, first_param = next(model.transformer.named_parameters())
-                print(f"DEBUG: transformer parameter '{first_param_name}' - shape: {first_param.shape}, dtype: {first_param.dtype}")
-                # Print a small slice to compare values between CPU and TPU
-                print(f"DEBUG: values (first 5): {first_param.flatten()[:5].tolist()}")
+                model_comp = ("transformer", model.transformer)
             elif hasattr(model, "unet") and model.unet is not None:
-                first_param_name, first_param = next(model.unet.named_parameters())
-                print(f"DEBUG: unet parameter '{first_param_name}' - shape: {first_param.shape}, dtype: {first_param.dtype}")
-                print(f"DEBUG: values (first 5): {first_param.flatten()[:5].tolist()}")
+                model_comp = ("unet", model.unet)
+                
+            if model_comp:
+                name, component = model_comp
+                params = list(component.named_parameters())
+                total_params = len(params)
+                print(f"DEBUG: {name} total parameters: {total_params}")
+                
+                # Sample parameters: first, middle, and last
+                sample_indices = [0, total_params // 2, total_params - 1]
+                for idx in sample_indices:
+                    p_name, p_tensor = params[idx]
+                    print(f"DEBUG: {name} [{idx}] '{p_name}' - shape: {p_tensor.shape}, dtype: {p_tensor.dtype}")
+                    print(f"DEBUG: values (first 5): {p_tensor.flatten()[:5].tolist()}")
+            
+            # Also sample the VAE if it exists
+            if hasattr(model, "vae") and model.vae is not None:
+                vae_params = list(model.vae.named_parameters())
+                if vae_params:
+                    # Sample the middle parameter of the VAE
+                    idx = len(vae_params) // 2
+                    p_name, p_tensor = vae_params[idx]
+                    print(f"DEBUG: vae [{idx}] '{p_name}' - shape: {p_tensor.shape}, dtype: {p_tensor.dtype}")
+                    print(f"DEBUG: values (first 5): {p_tensor.flatten()[:5].tolist()}")
+            
+            print("="*50 + "\n")
         except Exception as e:
-            print(f"DEBUG: Could not print parameter: {e}")
+            print(f"DEBUG: Could not print parameters: {e}")
 
         return model
 
