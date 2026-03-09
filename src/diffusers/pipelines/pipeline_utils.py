@@ -1126,6 +1126,21 @@ class DiffusionPipeline(ConfigMixin, PushToHubMixin):
             setattr(model, "hf_device_map", final_device_map)
         if quantization_config is not None:
             setattr(model, "quantization_config", quantization_config)
+            
+        # DEBUG: Print weights of the model
+        try:
+            if hasattr(model, "transformer") and model.transformer is not None:
+                first_param_name, first_param = next(model.transformer.named_parameters())
+                print(f"DEBUG: transformer parameter '{first_param_name}' - shape: {first_param.shape}, dtype: {first_param.dtype}")
+                # Print a small slice to compare values between CPU and TPU
+                print(f"DEBUG: values (first 5): {first_param.flatten()[:5].tolist()}")
+            elif hasattr(model, "unet") and model.unet is not None:
+                first_param_name, first_param = next(model.unet.named_parameters())
+                print(f"DEBUG: unet parameter '{first_param_name}' - shape: {first_param.shape}, dtype: {first_param.dtype}")
+                print(f"DEBUG: values (first 5): {first_param.flatten()[:5].tolist()}")
+        except Exception as e:
+            print(f"DEBUG: Could not print parameter: {e}")
+
         return model
 
     @property
